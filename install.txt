@@ -1,0 +1,11 @@
+Plugin Name: Login Redirect
+Author: Andrew Billits
+
+Files:
+----------------------------------------------------------------------
+login-redirect.php - goes in /wp-content/mu-plugins
+
+Instructions:
+----------------------------------------------------------------------
+1) Place the files in the specified directories
+2) Edit the config section at the top of login-redirect.php
