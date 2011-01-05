@@ -8,6 +8,7 @@ Change Log:
 1.0.2 - 01/05/2011
 ----------------------------------------------------------------------
 - WP 3.1+ compatibility.
+- Add option to network settings.
 - Use PHP redirect instead of JavaScript.
 - Internationalization.
 
