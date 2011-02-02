@@ -3,8 +3,8 @@
 Plugin Name: Login Redirect
 Plugin URI: http://premium.wpmudev.org/project/login-redirect
 Description: Redirects users to specified url after they've logged in, replacing the default 'go to dashboard' behavior.
-Author: Andrew Billits, ulrich sossou
-Version: 1.0.2
+Author: Andrew Billits, Ulrich Sossou
+Version: 1.0.3
 Text Domain: login_redirect
 Author URI: http://premium.wpmudev.org/
 WDP ID: 43
@@ -46,6 +46,7 @@ class Login_Redirect {
 		add_filter( 'login_redirect', array( &$this, 'redirect' ), 10, 3 );
 		add_action( 'wpmu_options', array( &$this, 'network_option' ) );
 		add_action( 'update_wpmu_options', array( &$this, 'update_network_option' ) );
+		add_action( 'admin_init', array( &$this, 'add_settings_field' ) );
 
 		// load text domain
 		if ( defined( 'WPMU_PLUGIN_DIR' ) && file_exists( WPMU_PLUGIN_DIR . '/login-redirect.php' ) ) {
@@ -61,7 +62,11 @@ class Login_Redirect {
 	function redirect( $redirect_to, $requested_redirect_to, $user ) {
 		$interim_login = isset( $_REQUEST['interim-login'] );
 		$reauth = empty( $_REQUEST['reauth'] ) ? false : true;
-		$login_redirect_url = get_site_option( 'login_redirect_url' );
+
+		if( $this->is_plugin_active_for_network( plugin_basename( __FILE__ ) ) )
+			$login_redirect_url = get_site_option( 'login_redirect_url' );
+		else
+			$login_redirect_url = get_option( 'login_redirect_url' );
 
 		if ( !is_wp_error( $user ) && !$reauth && !$interim_login && !empty( $login_redirect_url ) ) {
 			wp_redirect( $login_redirect_url );
@@ -75,6 +80,8 @@ class Login_Redirect {
 	 * Network option
 	 **/
 	function network_option() {
+		if( ! $this->is_plugin_active_for_network( plugin_basename( __FILE__ ) ) )
+			return;
 		?>
 		<h3><?php _e( 'Login Redirect', 'login_redirect' ); ?></h3>
 		<table class="form-table">
@@ -95,6 +102,41 @@ class Login_Redirect {
 	 **/
 	function update_network_option() {
 		update_site_option( 'login_redirect_url', stripslashes( $_POST['login_redirect_url'] ) );
+	}
+
+	/**
+	 * Add setting field for singlesite
+	 **/
+	function add_settings_field() {
+		if( $this->is_plugin_active_for_network( plugin_basename( __FILE__ ) ) )
+			return;
+
+		add_settings_section( 'login_redirect_setting_section', __( 'Login Redirect', 'login_redirect' ), '__return_false', 'general' );
+
+		add_settings_field( 'login_redirect_url', __( 'Redirect to', 'login_redirect' ), array( &$this, 'site_option' ), 'general', 'login_redirect_setting_section' );
+
+		register_setting( 'general', 'login_redirect_url' );
+	}
+
+	/**
+	 * Setting field for singlesite
+	 **/
+	function site_option() {
+		echo '<input name="login_redirect_url" type="text" id="login_redirect_url" value="' . esc_attr( get_option( 'login_redirect_url' ) ) . '" size="40" />';
+	}
+
+	/**
+	 * Verify if plugin is network activated
+	 **/
+	function is_plugin_active_for_network( $plugin ) {
+		if ( !is_multisite() )
+			return false;
+
+		$plugins = get_site_option( 'active_sitewide_plugins');
+		if ( isset($plugins[$plugin]) )
+			return true;
+
+		return false;
 	}
 
 }
