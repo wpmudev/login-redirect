@@ -3,15 +3,15 @@
 Plugin Name: Login Redirect
 Plugin URI: http://premium.wpmudev.org/project/login-redirect
 Description: Redirects users to specified url after they've logged in, replacing the default 'go to dashboard' behavior.
-Author: Andrew Billits, Ulrich Sossou
-Version: 1.0.3
+Author: Andrew Billits, Ulrich Sossou, Mariusz Misiek(Incsub)
+Version: 1.0.4
 Text Domain: login_redirect
 Author URI: http://premium.wpmudev.org/
 WDP ID: 43
 */
 
 /*
-Copyright 2007-2011 Incsub (http://incsub.com)
+Copyright 2007-2013 Incsub (http://incsub.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
@@ -43,7 +43,8 @@ class Login_Redirect {
 	 * PHP 5 constructor
 	 **/
 	function __construct() {
-		add_filter( 'login_redirect', array( &$this, 'redirect' ), 10, 3 );
+		if(!isset($_REQUEST['redirect_to']))
+			add_filter( 'login_redirect', array( &$this, 'redirect' ), 10, 3 );
 		add_action( 'wpmu_options', array( &$this, 'network_option' ) );
 		add_action( 'update_wpmu_options', array( &$this, 'update_network_option' ) );
 		add_action( 'admin_init', array( &$this, 'add_settings_field' ) );
