@@ -1,5 +1,7 @@
 Plugin Name: Login Redirect
-Author: Andrew Billits
+Author: WPMUDEV
+Lead developer: Maniu
+Contributors: Andrew Billits, Ulrich Sossou
 
 Change Log:
 ----------------------------------------------------------------------

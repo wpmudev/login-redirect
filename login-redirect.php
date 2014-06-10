@@ -3,7 +3,7 @@
 Plugin Name: Login Redirect
 Plugin URI: http://premium.wpmudev.org/project/login-redirect
 Description: Redirects users to specified url after they've logged in, replacing the default 'go to dashboard' behavior.
-Author: Andrew Billits, Ulrich Sossou, Mariusz Misiek(Incsub)
+Author: WPMUDEV
 Version: 1.0.6
 Text Domain: login_redirect
 Author URI: http://premium.wpmudev.org/
@@ -32,24 +32,22 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 class Login_Redirect {
 
-	/**
-	 * PHP 4 constructor
-	 **/
-	function Login_Redirect() {
-		__construct();
-	}
-
-	/**
-	 * PHP 5 constructor
-	 **/
 	function __construct() {
-		if(!isset($_REQUEST['redirect_to']) || $_REQUEST['redirect_to'] == admin_url() )
-			add_filter( 'login_redirect', array( &$this, 'redirect' ), 10, 3 );
+		include_once( 'login-redirect-files/wpmudev-dash-notification.php' );
 
-		add_action( 'wpmu_options', array( &$this, 'network_option' ) );
-		add_action( 'update_wpmu_options', array( &$this, 'update_network_option' ) );
+		if(!isset($_REQUEST['redirect_to']) || $_REQUEST['redirect_to'] == admin_url() )
+			add_filter( 'login_redirect', array( &$this, 'redirect' ), 999, 3 );
+
+		if( ! $this->is_plugin_active_for_network( plugin_basename( __FILE__ ) ) ) {
+			add_action( 'wpmu_options', array( &$this, 'network_option' ) );
+			add_action( 'update_wpmu_options', array( &$this, 'update_network_option' ) );
+		}
 		add_action( 'admin_init', array( &$this, 'add_settings_field' ) );
 
+		add_action( 'plugins_loaded', array( &$this, 'load_translation' ) );
+	}
+
+	function load_translation() {
 		// load text domain
 		if ( defined( 'WPMU_PLUGIN_DIR' ) && file_exists( WPMU_PLUGIN_DIR . '/login-redirect.php' ) ) {
 			load_muplugin_textdomain( 'login_redirect', 'login-redirect-files/languages' );
@@ -82,8 +80,6 @@ class Login_Redirect {
 	 * Network option
 	 **/
 	function network_option() {
-		if( ! $this->is_plugin_active_for_network( plugin_basename( __FILE__ ) ) )
-			return;
 		?>
 		<h3><?php _e( 'Login Redirect', 'login_redirect' ); ?></h3>
 		<table class="form-table">
@@ -143,18 +139,4 @@ class Login_Redirect {
 
 }
 
-$login_redirect =& new Login_Redirect();
-
-/**
- * Show notification if WPMUDEV Update Notifications plugin is not installed
- *
- **/
-if ( !function_exists( 'wdp_un_check' ) ) {
-	add_action( 'admin_notices', 'wdp_un_check', 5 );
-	add_action( 'network_admin_notices', 'wdp_un_check', 5 );
-
-	function wdp_un_check() {
-		if ( !class_exists( 'WPMUDEV_Update_Notifications' ) && current_user_can( 'edit_users' ) )
-			echo '<div class="error fade"><p>' . __('Please install the latest version of <a href="http://premium.wpmudev.org/project/update-notifications/" title="Download Now &raquo;">our free Update Notifications plugin</a> which helps you stay up-to-date with the most stable, secure versions of WPMU DEV themes and plugins. <a href="http://premium.wpmudev.org/wpmu-dev/update-notifications-plugin-information/">More information &raquo;</a>', 'wpmudev') . '</a></p></div>';
-	}
-}
+$login_redirect = new Login_Redirect();
