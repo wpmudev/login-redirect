@@ -4,7 +4,7 @@ Plugin Name: Login Redirect
 Plugin URI: http://premium.wpmudev.org/project/login-redirect
 Description: Redirects users to specified url after they've logged in, replacing the default 'go to dashboard' behavior.
 Author: WPMUDEV
-Version: 1.0.6
+Version: 1.0.7
 Text Domain: login_redirect
 Author URI: http://premium.wpmudev.org/
 WDP ID: 43
